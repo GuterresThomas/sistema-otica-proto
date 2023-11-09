@@ -33,4 +33,23 @@ export class Client {
     enum: TypeCLient,
   })
   types: TypeCLient;
+
+  @Column({ nullable: true }) // Campo para informar se é para longe, perto ou ambos
+  prescriptionType: string;
+
+  @Column({ type: 'json', nullable: true }) // Informações para o olho direito
+  rightEye: {
+    spherical: number;
+    cylindrical: number;
+    axis: number; //eixo
+    dnp: number;
+  };
+
+  @Column({ type: 'json', nullable: true }) // Informações para o olho esquerdo
+  leftEye: {
+    spherical: number;
+    cylindrical: number;
+    axis: number;
+    dnp: number;
+  };
 }

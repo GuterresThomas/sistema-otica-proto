@@ -7,6 +7,7 @@ enum UserPermission {
   }
 @Entity()
 export class User {
+[x: string]: any;
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
