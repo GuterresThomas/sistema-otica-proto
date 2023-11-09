@@ -2,8 +2,9 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../users/models/user.entity'; 
-import { Client } from '../clients/models/client.entity'
-import { Employee } from '../employees/models/employees.entity'
+import { Client } from '../clients/models/client.entity';
+import { Employee } from '../employees/models/employees.entity';
+import { Product } from '../products/models/product.entity'
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { Employee } from '../employees/models/employees.entity'
       useFactory: async (configService: ConfigService) => ({
         type: 'postgres',
         url: configService.get('DATABASE_URL'), 
-        entities: [User, Client, Employee],
+        entities: [User, Client, Employee, Product],
         synchronize: true
       }),
     }),
