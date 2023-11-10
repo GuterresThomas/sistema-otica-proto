@@ -13,6 +13,12 @@ export class SalesController {
     async findAll(): Promise<Sale[]> {
         return this.salesService.findAll();
     }
+
+    @Get('by-employee/:employeeId')
+    async findByEmployee(@Param('employeeId') employeeId: string): Promise<Sale[]> {
+        return this.salesService.findByEmployeeId(employeeId);
+      }
+    
     @Post()
     @HttpCode(201)
     async create(@Body() sale: CreateSaleDto): Promise<Sale> {

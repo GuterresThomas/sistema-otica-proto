@@ -13,6 +13,10 @@ export class SalesService {
         @InjectRepository(Sale)
         private saleRepository: Repository<Sale>,
       ) {}
+     
+      async findByEmployeeId(employeeId: string): Promise<Sale[]> {
+        return this.saleRepository.find({ where: { employee: { id: employeeId } } });
+    }
     
       async findAll(): Promise<Sale[]> {
         return this.saleRepository.find();
