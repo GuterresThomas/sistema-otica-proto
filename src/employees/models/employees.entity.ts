@@ -11,8 +11,6 @@ export class Employee {
     @Column()
     name: string;
 
-    @Column('decimal', { precision: 10, scale: 2 })
-    comission: number;
 
     @ManyToOne(() => User, (user) => user.employees)
     @JoinColumn({ name: 'userId' })

@@ -2,6 +2,8 @@ import { Controller, Get, Post, Body, Put, Param, Delete, NotFoundException, Htt
 import { SalesService } from './sales.service';
 import { Sale } from './models/sale.entity';
 
+import { CreateSaleDto } from 'src/sales/sales.service'
+
 @Controller('api/v1/sales')
 
 export class SalesController {
@@ -13,7 +15,7 @@ export class SalesController {
     }
     @Post()
     @HttpCode(201)
-    async create(@Body() sale: Sale): Promise<Sale> {
+    async create(@Body() sale: CreateSaleDto): Promise<Sale> {
         const createdSale = await this.salesService.create(sale);
         console.log(sale);
         return createdSale;
