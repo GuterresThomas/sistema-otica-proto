@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 @Entity()
 export class Employee {
+[x: string]: any;
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
