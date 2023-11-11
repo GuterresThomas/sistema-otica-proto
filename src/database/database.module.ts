@@ -5,7 +5,6 @@ import { User } from '../users/models/user.entity';
 import { Client } from '../clients/models/client.entity';
 import { Employee } from '../employees/models/employees.entity';
 import { Product } from '../products/models/product.entity'
-import { Sale } from '../sales/models/sale.entity'
 
 
 @Module({
@@ -17,7 +16,7 @@ import { Sale } from '../sales/models/sale.entity'
       useFactory: async (configService: ConfigService) => ({
         type: 'postgres',
         url: configService.get('DATABASE_URL'), 
-        entities: [User, Client, Employee, Product, Sale],
+        entities: [User, Client, Employee, Product],
         synchronize: true
       }),
     }),
