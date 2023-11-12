@@ -7,8 +7,8 @@ export class Cash {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'integer', default: 0 })
-  balance: number;
+  @Column()
+  balance_in_cents: number;
 
   @OneToOne(type => Employee)
   @JoinColumn()

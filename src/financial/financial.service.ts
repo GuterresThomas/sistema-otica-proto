@@ -23,7 +23,7 @@ export class CashService {
 
   async getBalance(employee: Employee): Promise<number> {
     const cash = await this.getCashByEmployee(employee);
-    return cash ? cash.balance : 0;
+    return cash ? cash.balance_in_cents : 0;
   }
 
   async updateBalance(employee: Employee, amount: number): Promise<void> {
@@ -34,7 +34,7 @@ export class CashService {
       cash.employee = employee;
     }
 
-    cash.balance += amount;
+    cash.balance_in_cents += amount;
 
     await this.cashRepository.save(cash);
   }
