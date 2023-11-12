@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm';
-import { User } from '../../users/models/user.entity';
+import { Employee } from 'src/employees/models/employees.entity';
+
 
 @Entity()
 export class Cash {
@@ -9,7 +10,7 @@ export class Cash {
   @Column({ type: 'integer', default: 0 })
   balance: number;
 
-  @OneToOne(type => User)
+  @OneToOne(type => Employee)
   @JoinColumn()
-  user: User;
+  employee: Employee;
 }

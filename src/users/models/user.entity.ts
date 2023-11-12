@@ -29,7 +29,5 @@ export class User {
 
   @Column()
   LojaId: number;
-
-  @OneToOne(type => Cash, cash => cash.user, { cascade: true })
-  cash: Cash;
+ 
 }
