@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
+import { Cash } from '../../financial/models/cash.entity'
 
 enum UserPermission {
     Admin = 'Admin',
@@ -28,4 +29,7 @@ export class User {
 
   @Column()
   LojaId: number;
+
+  @OneToOne(type => Cash, cash => cash.user, { cascade: true })
+  cash: Cash;
 }
