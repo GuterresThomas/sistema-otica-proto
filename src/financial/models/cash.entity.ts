@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, ManyToOne } from 'typeorm';
 import { Employee } from 'src/employees/models/employees.entity';
 
 
@@ -10,7 +10,16 @@ export class Cash {
   @Column({ default: 0 })
   balance_in_cents: number;
 
-  @OneToOne(type => Employee)
-  @JoinColumn()
+  @ManyToOne(type => Employee)
+  @JoinColumn({ name: 'employeeId' })
   employee: Employee;
+
+  @Column({ default: false })
+  isClosed: boolean;
+
+  @Column({ type: 'timestamp', default: null, nullable: true })
+  openedAt: Date;
+
+  @Column({ type: 'timestamp', default: null, nullable: true })
+  closedAt: Date;
 }

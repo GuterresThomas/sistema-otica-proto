@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToOne, OneToMany } from 'typeorm';
 import { User } from '../../users/models/user.entity'
 import { v4 as uuidv4 } from 'uuid';
 import { Cash } from 'src/financial/models/cash.entity';
@@ -18,6 +18,6 @@ export class Employee {
     @JoinColumn({ name: 'userId' })
     user: User; 
 
-    @OneToOne(type => Cash, cash => cash.employee, { cascade: true })
+    @OneToMany(type => Cash, cash => cash.employee, { cascade: true })
     cash: Cash;
 }

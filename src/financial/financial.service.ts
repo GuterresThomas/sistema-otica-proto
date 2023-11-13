@@ -9,6 +9,7 @@ import { CreateSaleDto } from './dto/create-sale.dto.';
 import { UpdateSaleDto } from './dto/update-sale.dto';
 import { Client } from 'src/clients/models/client.entity';
 import { Product } from 'src/products/models/product.entity';
+import { ClosedCashHistory } from './models/closed_cash_history.entity';
 
 
 
@@ -18,11 +19,30 @@ export class FinancialService {
 
 }
 
+
+@Injectable()
+export class ClosedCashHistoryService {
+  constructor(
+    @InjectRepository(ClosedCashHistory)
+    private readonly closedCashHistoryRepository: Repository<ClosedCashHistory>,
+  
+  ){}
+
+  async createClosedCashHistory(closedCashHistory: ClosedCashHistory): Promise<ClosedCashHistory> {
+    closedCashHistory.opened_at = new Date();
+    
+    return this.closedCashHistoryRepository.save(closedCashHistory);
+  }
+}
+
+
 @Injectable()
 export class CashService {
   constructor(
     @InjectRepository(Cash)
     private readonly cashRepository: Repository<Cash>,
+
+     private readonly closedCashHistoryService: ClosedCashHistoryService,
   ) {}
 
   async getBalance(employee: Employee): Promise<number> {
@@ -44,31 +64,62 @@ export class CashService {
   }
 
   async openCash(employee: Employee): Promise<void> {
-    let cash = await this.getCashByEmployee(employee);
-    if (cash) {
-      throw new Error('Cash is already open for this employee.');
+    const existingCash = await this.getCashByEmployee(employee);
+  
+    // Se um caixa existente estiver fechado, reabre o caixa atual
+    if (existingCash && existingCash.isClosed) {
+      existingCash.isClosed = false;
+      existingCash.openedAt = new Date();
+      await this.cashRepository.save(existingCash);
+    } else {
+      // Se não houver um caixa existente, cria um novo caixa aberto
+      const newCash = new Cash();
+      newCash.employee = employee;
+      newCash.isClosed = false;
+      newCash.openedAt = new Date();
+      await this.cashRepository.save(newCash);
     }
-
-    cash = new Cash();
-    cash.employee = employee;
-
-    await this.cashRepository.save(cash);
   }
 
   async isCashOpen(employee: Employee): Promise<boolean> {
+    // Obtenha o caixa para o funcionário
     const cash = await this.getCashByEmployee(employee);
-    return !!cash; // Retorna true se o caixa estiver aberto, false se estiver fechado
+  
+    // Verifica se o caixa está aberto
+    return !!cash && !cash.isClosed;
   }
+  
 
   async closeCash(employee: Employee): Promise<void> {
     const cash = await this.getCashByEmployee(employee);
-
+  
     if (!cash) {
       throw new NotFoundException('Cash not found for this user.');
     }
-
-    await this.cashRepository.remove(cash);
+  
+    cash.isClosed = true;
+    cash.closedAt = new Date();
+  
+    // Salve a entidade existente para fechar o caixa atual
+    await this.cashRepository.save(cash);
+  
+    const closedCashHistory = new ClosedCashHistory();
+    closedCashHistory.employee = employee;
+    closedCashHistory.balance_in_cents = cash.balance_in_cents;
+    closedCashHistory.closed_at = cash.closedAt; // ou use new Date() se preferir uma nova data
+    await this.closedCashHistoryService.createClosedCashHistory(closedCashHistory);
   }
+  
+
+ /* async createNewCash(employee: Employee): Promise<Cash> {
+    const newCash = new Cash();
+    newCash.employee = employee;
+    newCash.isClosed = false;
+    newCash.openedAt = new Date();
+    return this.cashRepository.save(newCash);
+  } */
+  
+
 
   async getCashByEmployee(employee: Employee): Promise<Cash | undefined> {
     return this.cashRepository.findOne({ where: { employee } });
@@ -83,6 +134,9 @@ export class SalesService {
     private readonly saleRepository: Repository<Sale>,
     @InjectRepository(Cash)
     private readonly cashRepository: Repository<Cash>,
+    
+    
+    private readonly closedCashHistoryService: ClosedCashHistoryService,
   ) {}
 
   async getAllSales(): Promise<Sale[]> {
@@ -102,9 +156,8 @@ export class SalesService {
 
   async createSale(createSaleDto: CreateSaleDto): Promise<Sale> {
     const sale = this.saleRepository.create(createSaleDto);
-
-
-    const cashService = new CashService(this.cashRepository);
+    
+    const cashService = new CashService(this.cashRepository, this.closedCashHistoryService);
 
      // Obter o valor total da venda
   const totalAmount = createSaleDto.total_amount_in_cents;
