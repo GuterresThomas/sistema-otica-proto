@@ -18,4 +18,7 @@ export class CreateSaleDto {
 
   @IsNumber()
   total_amount_in_cents: number;
+  
+  @IsUUID()
+  cash_id: string;
 }

@@ -7,6 +7,8 @@ import { Employee } from 'src/employees/models/employees.entity';
 import { Sale } from './models/sale.entity';
 import { CreateSaleDto } from './dto/create-sale.dto.';
 import { UpdateSaleDto } from './dto/update-sale.dto';
+import { Client } from 'src/clients/models/client.entity';
+import { Product } from 'src/products/models/product.entity';
 
 
 
@@ -93,6 +95,10 @@ export class SalesService {
   async createSale(createSaleDto: CreateSaleDto): Promise<Sale> {
     const sale = this.saleRepository.create(createSaleDto);
     console.log(sale);
+    sale.client = { id: createSaleDto.client_id } as Client;
+    sale.product = { id: createSaleDto.product_id } as Product;
+    sale.employee = { id: createSaleDto.employee_id } as Employee;
+    sale.cash = {id: createSaleDto.cash_id } as Cash;
     return this.saleRepository.save(sale);
   }
 
