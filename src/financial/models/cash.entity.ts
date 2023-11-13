@@ -7,7 +7,7 @@ export class Cash {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ default: 0 })
   balance_in_cents: number;
 
   @OneToOne(type => Employee)

@@ -4,7 +4,9 @@ import { Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { Cash } from './models/cash.entity';
 import { Employee } from 'src/employees/models/employees.entity';
-
+import { Sale } from './models/sale.entity';
+import { CreateSaleDto } from './dto/create-sale.dto.';
+import { UpdateSaleDto } from './dto/update-sale.dto';
 
 
 
@@ -65,4 +67,47 @@ export class CashService {
     return this.cashRepository.findOne({ where: { employee } });
   }
 
+}
+
+@Injectable()
+export class SalesService {
+  constructor(
+    @InjectRepository(Sale)
+    private readonly saleRepository: Repository<Sale>,
+  ) {}
+
+  async getAllSales(): Promise<Sale[]> {
+    return this.saleRepository.find();
+  }
+
+  async getSaleById(id: string): Promise<Sale> {
+    const sale = await this.saleRepository.findOne({ where: { id } });
+
+    if (!sale) {
+      throw new NotFoundException('Sale not found');
+    }
+
+    return sale;
+  }
+
+  async createSale(createSaleDto: CreateSaleDto): Promise<Sale> {
+    const sale = this.saleRepository.create(createSaleDto);
+    console.log(sale);
+    return this.saleRepository.save(sale);
+  }
+
+  async updateSale(id: string, updateSaleDto: UpdateSaleDto): Promise<Sale> {
+    const sale = await this.getSaleById(id);
+
+    // Update properties of the sale entity based on updateSaleDto
+    Object.assign(sale, updateSaleDto);
+
+    return this.saleRepository.save(sale);
+  }
+
+  async deleteSale(id: string): Promise<void> {
+    const sale = await this.getSaleById(id);
+
+    await this.saleRepository.remove(sale);
+  }
 }
