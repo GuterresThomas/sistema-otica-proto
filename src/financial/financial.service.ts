@@ -55,6 +55,11 @@ export class CashService {
     await this.cashRepository.save(cash);
   }
 
+  async isCashOpen(employee: Employee): Promise<boolean> {
+    const cash = await this.getCashByEmployee(employee);
+    return !!cash; // Retorna true se o caixa estiver aberto, false se estiver fechado
+  }
+
   async closeCash(employee: Employee): Promise<void> {
     const cash = await this.getCashByEmployee(employee);
 
@@ -65,7 +70,7 @@ export class CashService {
     await this.cashRepository.remove(cash);
   }
 
-  private async getCashByEmployee(employee: Employee): Promise<Cash | undefined> {
+  async getCashByEmployee(employee: Employee): Promise<Cash | undefined> {
     return this.cashRepository.findOne({ where: { employee } });
   }
 
@@ -76,6 +81,8 @@ export class SalesService {
   constructor(
     @InjectRepository(Sale)
     private readonly saleRepository: Repository<Sale>,
+    @InjectRepository(Cash)
+    private readonly cashRepository: Repository<Cash>,
   ) {}
 
   async getAllSales(): Promise<Sale[]> {
@@ -91,9 +98,28 @@ export class SalesService {
 
     return sale;
   }
+ 
 
   async createSale(createSaleDto: CreateSaleDto): Promise<Sale> {
     const sale = this.saleRepository.create(createSaleDto);
+
+
+    const cashService = new CashService(this.cashRepository);
+
+     // Obter o valor total da venda
+  const totalAmount = createSaleDto.total_amount_in_cents;
+
+  // Atualizar o saldo do caixa
+ const employee = { id: createSaleDto.employee_id } as Employee;
+  
+ const isCashOpen = await cashService.isCashOpen(employee);
+ if (!isCashOpen) {
+   throw new Error('Cash is closed for this employee. Open the cash before making a sale.');
+ }
+  // Adicionar o valor total da venda do saldo do caixa
+  await cashService.updateBalance(employee, totalAmount);
+
+
     console.log(sale);
     sale.client = { id: createSaleDto.client_id } as Client;
     sale.product = { id: createSaleDto.product_id } as Product;
@@ -101,7 +127,7 @@ export class SalesService {
     sale.cash = {id: createSaleDto.cash_id } as Cash;
     return this.saleRepository.save(sale);
   }
-
+  
   async updateSale(id: string, updateSaleDto: UpdateSaleDto): Promise<Sale> {
     const sale = await this.getSaleById(id);
 

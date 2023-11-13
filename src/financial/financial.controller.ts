@@ -21,6 +21,17 @@ export class CashController {
         private readonly cashService: CashService
         ) {}
     
+
+
+        @Get('balance/:employeeId')
+        async getBalanceById(@Param('employeeId') employeeId: string, @Res() res: Response): Promise<void> {
+          const employee = await this.findEmployee(employeeId);
+      
+          const balance = await this.cashService.getBalance(employee);
+      
+          res.status(HttpStatus.OK).json({ balance });
+        }
+
   @HttpCode(201)  
   @Post('open/:employeeId')
   async openCash(@Param('employeeId') employeeId: string, @Res() res: Response): Promise<void> {
