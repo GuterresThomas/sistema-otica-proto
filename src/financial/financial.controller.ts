@@ -3,6 +3,7 @@ import { CashService, FinancialService } from './financial.service';
 import { User } from 'src/users/models/user.entity';
 import { EmployeesService } from 'src/employees/employees.service';
 import { Employee } from 'src/employees/models/employees.entity';
+import { Cash } from './models/cash.entity';
 
 
 @Controller('api/v1/financial')
@@ -25,7 +26,6 @@ export class CashController {
     const openedCash = new Date().toLocaleString();
 
     console.log(`cash opened at: ${openedCash}`)
-    res.json()
   }
 
   @HttpCode(201)
@@ -51,4 +51,11 @@ export class CashController {
 
     return employee;
   }
+
+  @Get()
+  async getBalance(employee: Employee): Promise<number> {
+      
+    return this.cashService.getBalance(employee);
+  }
+  
 }
