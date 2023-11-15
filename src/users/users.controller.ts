@@ -36,4 +36,19 @@ export class UsersController {
         await this.usersService.delete(id);
         return { message: 'User deleted successfully!' };
     }
+
+    @Post('login')
+    async login(@Body() body: { email: string, password: string }): Promise<{ token: string }> {
+        const { email, password } = body;
+
+        const token = await this.usersService.login(email, password);
+
+        if (!token) {
+            throw new NotFoundException('Credenciais inválidas');
+        }
+
+        return { token };
+    }
+
+    
 }
