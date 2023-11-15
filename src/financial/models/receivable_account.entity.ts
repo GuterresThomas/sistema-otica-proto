@@ -1,6 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { User } from '../../users/models/user.entity'; // Importe outras entidades conforme necessário
 import { Cash } from './cash.entity';
+import { IsOptional } from 'class-validator';
 
 @Entity()
 export class ReceivableAccount {
@@ -9,7 +10,8 @@ export class ReceivableAccount {
 
   @Column()
   amount_in_cents: number;
-
+  
+  @IsOptional()
   @Column({ type: 'timestamp' })
   due_date: Date;
 

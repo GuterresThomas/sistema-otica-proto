@@ -72,7 +72,7 @@ closedCashHistoryService: ClosedCashHistoryService;
     });
 
     await this.updateBalanceForPaidAccounts();
-    
+
     return await this.payableAccountRepository.save(newPayableAccount);
   }
   
@@ -95,20 +95,69 @@ closedCashHistoryService: ClosedCashHistoryService;
         await this.cashRepository.save(cash);
       }
 
-      // Você pode adicionar lógicas adicionais aqui, se necessário, como atualizar o status da conta, etc.
     }
   }
   
   async createReceivableAccount(createReceivableAccountDto: CreateReceivableAccountDto): Promise<ReceivableAccount> {
-    const receivableAccount = this.receivableAccountRepository.create(createReceivableAccountDto);
+    console.log('Valores e tipos antes da validação do DTO:');
+      console.log('amount_in_cents:', createReceivableAccountDto.amount_in_cents, typeof createReceivableAccountDto.amount_in_cents);
+      console.log('due_date:', createReceivableAccountDto.due_date, typeof createReceivableAccountDto.due_date);
+      console.log('is_open:', createReceivableAccountDto.is_open, typeof createReceivableAccountDto.is_open);
+      console.log('received:', createReceivableAccountDto.received, typeof createReceivableAccountDto.received);
+      console.log('user_id:', createReceivableAccountDto.user_id, typeof createReceivableAccountDto.user_id);
+      console.log('cash_id:', createReceivableAccountDto.cash_id, typeof createReceivableAccountDto.cash_id);
+      
+      const { user_id, cash_id, due_date, ...rest } = createReceivableAccountDto;
 
-    // Atualize o balanço do caixa para aumentar o valor do ReceivableAccount
-    const employee = { id: createReceivableAccountDto.user_id } as Employee;
-    const cashService = new CashService(this.cashRepository, this.closedCashHistoryService);
-    await cashService.updateBalance(employee, receivableAccount.amount_in_cents);
+    
+      const formattedDueDate: string = createReceivableAccountDto.due_date.toString();
+      const formattedDueDateToIso = parseISO(formattedDueDate);
+      const parsedFormattedDueDate = format(formattedDueDateToIso, 'yyyy-MM-dd')
 
-    return this.receivableAccountRepository.save(receivableAccount);
+        // Verifica se o usuário e o caixa associados existem antes de criar a nova conta a receber
+        const user = await this.userRepository.findOne({ where: { id: user_id}});
+        const cash = await this.cashRepository.findOne({ where: { id: cash_id } });
+        if (!user || !cash) {
+          throw new Error('Usuário ou caixa não encontrado');
+        }
+
+        const newReceivableAccount = this.receivableAccountRepository.create({
+          ...rest,
+          user,
+          cash,
+          due_date: parsedFormattedDueDate,
+        });
+
+
+        await this.updateBalanceForReceivedAccounts();
+
+    return this.receivableAccountRepository.save(newReceivableAccount);
   }
+
+  async updateBalanceForReceivedAccounts(): Promise<void> {
+    // Busca por contas a pagar que estão fechadas e pagas
+    const receivedAccounts = await this.receivableAccountRepository.find({
+      where: {
+        is_open: false,
+        received: true,
+      },
+      relations: ['cash'], // Adiciona a relação com a entidade Cash
+    });
+
+    for (const account of receivedAccounts) {
+      console.log('Account:', account);
+      const cash = account.cash;
+    
+      if (cash) {
+        console.log('Cash:', cash);
+        cash.balance_in_cents += account.amount_in_cents;
+        console.log('New Cash Balance:', cash.balance_in_cents);
+    
+        await this.cashRepository.save(cash);
+      }
+    }
+  }
+
 }
 
 
