@@ -9,6 +9,9 @@ export class Product {
     @Column()
     intern_code: string;
 
+    @Column({default: 'NomeDoProduto'})
+    name: string;
+
     @Column()
     move_stock: boolean;
     @Column()
