@@ -3,6 +3,14 @@ import { User } from '../../users/models/user.entity'; // Importe outras entidad
 import { Cash } from './cash.entity';
 import { IsOptional } from 'class-validator';
 
+enum TypeAccount {
+  Boleto = 'Boleto',
+  Cartao = 'Cartao',
+  Crediario = 'Crediario',
+  Dinheiro = 'Dinheiro',
+}
+
+
 @Entity()
 export class ReceivableAccount {
   @PrimaryGeneratedColumn('uuid')
@@ -29,5 +37,11 @@ export class ReceivableAccount {
   @JoinColumn({ name: 'cash_id' })
   cash: Cash;
 
+  @Column({
+    type: 'enum',
+    enum: TypeAccount,
+    default: TypeAccount.Boleto,
+  })
+  types: TypeAccount;
   
 }
