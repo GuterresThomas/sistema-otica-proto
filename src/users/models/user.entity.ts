@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, OneToMany } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { Cash } from '../../financial/models/cash.entity'
+import { PayableAccount } from 'src/financial/models/payable_account.entity';
 
 enum UserPermission {
     Admin = 'Admin',
@@ -29,5 +30,8 @@ export class User {
 
   @Column()
   LojaId: number;
+
+  @OneToMany(() => PayableAccount, payableAccount => payableAccount.user)
+  payableAccounts: PayableAccount[];
  
 }

@@ -7,11 +7,29 @@ import { Cash } from './models/cash.entity';
 import { Sale } from './models/sale.entity';
 import { CreateSaleDto } from './dto/create-sale.dto.';
 import { UpdateSaleDto } from './dto/update-sale.dto';
-import { Response } from 'express'; // Ensure you import Response from 'express'
+import { CreatePayableAccountDto } from './dto/create-payable-account.dto';
+import { CreateReceivableAccountDto } from './dto/create-receivable-account.dto';
+import { Response } from 'express'; 
 
 
 @Controller('api/v1/financial')
-export class FinancialController {}
+export class FinancialController {
+  constructor(private readonly financialService: FinancialService) {}
+
+  @HttpCode(HttpStatus.CREATED)
+  @Post('payable-accounts')
+  async createPayableAccount(@Body() createPayableAccountDto: CreatePayableAccountDto, @Res() res: Response): Promise<void> {
+    const createdPayableAccount = await this.financialService.createPayableAccount(createPayableAccountDto);
+    res.status(HttpStatus.CREATED).json(createdPayableAccount);
+  }
+
+  @HttpCode(HttpStatus.CREATED)
+  @Post('receivable-accounts')
+  async createReceivableAccount(@Body() createReceivableAccountDto: CreateReceivableAccountDto, @Res() res: Response): Promise<void> {
+    const createdReceivableAccount = await this.financialService.createReceivableAccount(createReceivableAccountDto);
+    res.status(HttpStatus.CREATED).json(createdReceivableAccount);
+  }
+}
 
 @Controller('api/v1/cash')
 export class CashController {

@@ -22,4 +22,5 @@ export class Cash {
 
   @Column({ type: 'timestamp', default: null, nullable: true })
   closedAt: Date;
+
 }

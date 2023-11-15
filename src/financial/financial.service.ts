@@ -10,13 +10,105 @@ import { UpdateSaleDto } from './dto/update-sale.dto';
 import { Client } from 'src/clients/models/client.entity';
 import { Product } from 'src/products/models/product.entity';
 import { ClosedCashHistory } from './models/closed_cash_history.entity';
+import { PayableAccount } from './models/payable_account.entity';
+import { ReceivableAccount } from './models/receivable_account.entity';
+import { CreatePayableAccountDto } from './dto/create-payable-account.dto';
+import { CreateReceivableAccountDto } from './dto/create-receivable-account.dto';
+import { validateOrReject } from 'class-validator';
+import { User } from 'src/users/models/user.entity';
+import { format, parseISO } from 'date-fns';
+
+
 
 
 
 
 @Injectable()
 export class FinancialService {
+closedCashHistoryService: ClosedCashHistoryService;
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    
+    @InjectRepository(Cash)
+    private readonly cashRepository: Repository<Cash>,
+    @InjectRepository(ClosedCashHistory)
+    private readonly closedCashHistoryRepository: Repository<ClosedCashHistory>,
+    @InjectRepository(PayableAccount)
+    private readonly payableAccountRepository: Repository<PayableAccount>,
+    @InjectRepository(ReceivableAccount)
+    private readonly receivableAccountRepository: Repository<ReceivableAccount>,
+  ) {}
 
+  
+  async createPayableAccount(createPayableAccountDto: CreatePayableAccountDto): Promise<PayableAccount> {
+      console.log('Valores e tipos antes da validação do DTO:');
+      console.log('amount_in_cents:', createPayableAccountDto.amount_in_cents, typeof createPayableAccountDto.amount_in_cents);
+      console.log('due_date:', createPayableAccountDto.due_date, typeof createPayableAccountDto.due_date);
+      console.log('is_open:', createPayableAccountDto.is_open, typeof createPayableAccountDto.is_open);
+      console.log('paid:', createPayableAccountDto.paid, typeof createPayableAccountDto.paid);
+      console.log('user_id:', createPayableAccountDto.user_id, typeof createPayableAccountDto.user_id);
+      console.log('cash_id:', createPayableAccountDto.cash_id, typeof createPayableAccountDto.cash_id);
+      
+      const { user_id, cash_id, due_date, ...rest } = createPayableAccountDto;
+
+
+      const formattedDueDate: string = createPayableAccountDto.due_date.toString();
+      const formattedDueDateToIso = parseISO(formattedDueDate);
+      const parsedFormattedDueDate = format(formattedDueDateToIso, 'yyyy-MM-dd')
+
+    // Verifica se o usuário e o caixa associados existem antes de criar a nova conta a pagar
+    const user = await this.userRepository.findOne({ where: { id: user_id}});
+    const cash = await this.cashRepository.findOne({ where: { id: cash_id } });
+    if (!user || !cash) {
+      throw new Error('Usuário ou caixa não encontrado');
+    }
+
+    const newPayableAccount = this.payableAccountRepository.create({
+      ...rest,
+      user,
+      cash,
+      due_date: parsedFormattedDueDate,
+    });
+
+    await this.updateBalanceForPaidAccounts();
+    
+    return await this.payableAccountRepository.save(newPayableAccount);
+  }
+  
+  async updateBalanceForPaidAccounts(): Promise<void> {
+    // Busca por contas a pagar que estão fechadas e pagas
+    const paidAccounts = await this.payableAccountRepository.find({
+      where: {
+        is_open: false,
+        paid: true,
+      },
+      relations: ['cash'], // Adiciona a relação com a entidade Cash
+    });
+
+    for (const account of paidAccounts) {
+      // Obtém o caixa associado à conta a pagar
+      const cash = account.cash; // Supondo que a relação se chame 'cash'
+  
+      if (cash) {
+        cash.balance_in_cents -= account.amount_in_cents;
+        await this.cashRepository.save(cash);
+      }
+
+      // Você pode adicionar lógicas adicionais aqui, se necessário, como atualizar o status da conta, etc.
+    }
+  }
+  
+  async createReceivableAccount(createReceivableAccountDto: CreateReceivableAccountDto): Promise<ReceivableAccount> {
+    const receivableAccount = this.receivableAccountRepository.create(createReceivableAccountDto);
+
+    // Atualize o balanço do caixa para aumentar o valor do ReceivableAccount
+    const employee = { id: createReceivableAccountDto.user_id } as Employee;
+    const cashService = new CashService(this.cashRepository, this.closedCashHistoryService);
+    await cashService.updateBalance(employee, receivableAccount.amount_in_cents);
+
+    return this.receivableAccountRepository.save(receivableAccount);
+  }
 }
 
 

@@ -8,6 +8,8 @@ import { Product } from '../products/models/product.entity'
 import { Cash } from '../financial/models/cash.entity'
 import { Sale } from 'src/financial/models/sale.entity';
 import { ClosedCashHistory } from 'src/financial/models/closed_cash_history.entity';
+import { ReceivableAccount } from 'src/financial/models/receivable_account.entity';
+import { PayableAccount } from 'src/financial/models/payable_account.entity';
 
 
 @Module({
@@ -19,7 +21,7 @@ import { ClosedCashHistory } from 'src/financial/models/closed_cash_history.enti
       useFactory: async (configService: ConfigService) => ({
         type: 'postgres',
         url: configService.get('DATABASE_URL'), 
-        entities: [User, Client, Employee, Product, Cash, Sale, ClosedCashHistory],
+        entities: [User, Client, Employee, Product, Cash, Sale, ClosedCashHistory, ReceivableAccount, PayableAccount],
         synchronize: true
       }),
     }),

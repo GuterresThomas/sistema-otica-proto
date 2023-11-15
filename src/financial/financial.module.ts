@@ -9,14 +9,18 @@ import { EmployeesService } from 'src/employees/employees.service';
 import { Employee } from 'src/employees/models/employees.entity';
 import { Sale } from './models/sale.entity';
 import { ClosedCashHistory } from './models/closed_cash_history.entity';
+import { PayableAccount } from './models/payable_account.entity';
+import { ReceivableAccount } from './models/receivable_account.entity';
+
+
 
 
 
 
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Cash, Employee, Sale, ClosedCashHistory, ClosedCashHistory])],
-  providers: [FinancialService, CashService, EmployeesService, SalesService, ClosedCashHistoryService],
+  imports: [TypeOrmModule.forFeature([Cash, Employee, Sale, ClosedCashHistory, ClosedCashHistory, PayableAccount, ReceivableAccount, User])],
+  providers: [FinancialService, CashService, EmployeesService, SalesService, ClosedCashHistoryService, UsersService],
   controllers: [FinancialController, CashController, SalesController]
 })
 export class FinancialModule {}
