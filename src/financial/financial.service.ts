@@ -38,6 +38,7 @@ closedCashHistoryService: ClosedCashHistoryService;
     private readonly payableAccountRepository: Repository<PayableAccount>,
     @InjectRepository(ReceivableAccount)
     private readonly receivableAccountRepository: Repository<ReceivableAccount>,
+    
   ) {}
 
   
@@ -276,7 +277,8 @@ export class SalesService {
     @InjectRepository(Cash)
     private readonly cashRepository: Repository<Cash>,
     
-    
+    @InjectRepository(Product)
+    private readonly productRepository: Repository<Product>,
     private readonly closedCashHistoryService: ClosedCashHistoryService,
   ) {}
 
@@ -296,6 +298,23 @@ export class SalesService {
  
 
   async createSale(createSaleDto: CreateSaleDto): Promise<Sale> {
+    if (createSaleDto.product_id && createSaleDto.quantity_sold && createSaleDto.cash_id) {
+      const product = await this.productRepository.findOne({ where: { id: createSaleDto.product_id } });
+
+      if (!product) {
+        throw new Error('Product not found');
+      }
+
+      if (product.move_stock) {
+        if (product.stock < createSaleDto.quantity_sold) {
+          throw new Error('Insufficient stock');
+        }
+
+        product.stock -= createSaleDto.quantity_sold;
+        await this.productRepository.save(product);
+      }
+    }
+
     const sale = this.saleRepository.create(createSaleDto);
     
     const cashService = new CashService(this.cashRepository, this.closedCashHistoryService);
@@ -310,6 +329,8 @@ export class SalesService {
  if (!isCashOpen) {
    throw new Error('Cash is closed for this employee. Open the cash before making a sale.');
  }
+
+ 
   // Adicionar o valor total da venda do saldo do caixa
   await cashService.updateBalance(employee, totalAmount);
 
@@ -321,7 +342,8 @@ export class SalesService {
     sale.cash = {id: createSaleDto.cash_id } as Cash;
     return this.saleRepository.save(sale);
   }
-  
+
+
   async updateSale(id: string, updateSaleDto: UpdateSaleDto): Promise<Sale> {
     const sale = await this.getSaleById(id);
 
