@@ -95,8 +95,9 @@ export class UsersService {
       // Se as credenciais estiverem corretas, gera um token JWT
       const payload = { email: user.email, sub: user.id };
       const token = jwt.sign(payload, 'seu_segredo_secreto', { expiresIn: '1h' });
+      const name = user.name;
 
-      return { token, name: user.name };
+      return { token, name};
     } catch (error) {
       console.error('Erro durante a autenticação do usuário:', error);
       throw new Error('Erro durante a autenticação do usuário');
