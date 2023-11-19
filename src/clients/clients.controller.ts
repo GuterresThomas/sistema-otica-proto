@@ -11,6 +11,12 @@ export class ClientsController {
     async findAll(): Promise<Client[]> {
         return this.clientsService.findAll();
     }
+
+    @Get('/:id')
+    async findOne(id: string): Promise<Client> {
+        return this.clientsService.findOne(id);
+    }
+    
     @Post()
     @HttpCode(201)
     async create(@Body() client: Client): Promise<Client> {
