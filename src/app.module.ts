@@ -20,6 +20,7 @@ import { FinancialModule } from './financial/financial.module';
     EmployeesModule,
     ProductsModule,
     FinancialModule],
+    
   controllers: [AppController],
   providers: [AppService],
 })
