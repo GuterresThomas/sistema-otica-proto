@@ -76,7 +76,7 @@ export class UsersService {
   }
 
 
-  async login(email: string, password: string): Promise<string> {
+  async login(email: string, password: string): Promise<{token: string; name: string}> {
     try {
       // Encontre o usuário pelo email fornecido
       const user = await this.userRepository.findOne({ where: { email } });
@@ -96,7 +96,7 @@ export class UsersService {
       const payload = { email: user.email, sub: user.id };
       const token = jwt.sign(payload, 'seu_segredo_secreto', { expiresIn: '1h' });
 
-      return token;
+      return { token, name: user.name };
     } catch (error) {
       console.error('Erro durante a autenticação do usuário:', error);
       throw new Error('Erro durante a autenticação do usuário');
