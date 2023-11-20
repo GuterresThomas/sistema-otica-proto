@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Put, Param, Delete, NotFoundException, HttpCode, Res, HttpStatus } from '@nestjs/common';
 import { CashService, FinancialService, SalesService } from './financial.service';
 import { User } from 'src/users/models/user.entity';
-import { EmployeesService } from 'src/employees/employees.service';
+import { UsersService } from 'src/users/users.service';
 import { Employee } from 'src/employees/models/employees.entity';
 import { Cash } from './models/cash.entity';
 import { Sale } from './models/sale.entity';
@@ -14,7 +14,9 @@ import { Response } from 'express';
 
 @Controller('api/v1/financial')
 export class FinancialController {
-  constructor(private readonly financialService: FinancialService) {}
+  constructor(
+    private readonly financialService: FinancialService
+    ) {}
 
   @HttpCode(HttpStatus.CREATED)
   @Post('payable-accounts')
@@ -35,17 +37,17 @@ export class FinancialController {
 export class CashController {
 
     constructor(
-        private readonly employeeService: EmployeesService,
-        private readonly cashService: CashService
+        private readonly userService: UsersService,
+        private readonly cashService: CashService,
         ) {}
     
 
 
-        @Get('balance/:employeeId')
-        async getBalanceById(@Param('employeeId') employeeId: string, @Res() res: Response): Promise<void> {
-          const employee = await this.findEmployee(employeeId);
+        @Get('balance/:userId')
+        async getBalanceById(@Param('userId') userId: string, @Res() res: Response): Promise<void> {
+          const user = await this.findUser(userId);
       
-          const balance = await this.cashService.getBalance(employee);
+          const balance = await this.cashService.getBalance(user);
       
           res.status(HttpStatus.OK).json({ balance });
         }
@@ -53,7 +55,7 @@ export class CashController {
   @HttpCode(201)  
   @Post('open/:employeeId')
   async openCash(@Param('employeeId') employeeId: string, @Res() res: Response): Promise<void> {
-    const employee = await this.employeeService.findOne(employeeId);
+    const employee = await this.userService.findOne(employeeId);
     await this.cashService.openCash(employee);
 
     const openedCash = new Date().toLocaleString();
@@ -62,10 +64,10 @@ export class CashController {
   }
 
   @HttpCode(201)
-  @Post('close/:employeeId')
-  async closeCash(@Param('employeeId') employeeId: string, @Res() res: Response): Promise<void> {
-    const employee = await this.findEmployee(employeeId);
-    await this.cashService.closeCash(employee);
+  @Post('close/:userId')
+  async closeCash(@Param('userId') userId: string, @Res() res: Response): Promise<void> {
+    const user = await this.findUser(userId);
+    await this.cashService.closeCash(user);
 
     const closedAt = new Date().toLocaleString();
 
@@ -73,16 +75,16 @@ export class CashController {
     res.json()
   }
 
-  private async findEmployee(employeeId: string): Promise<Employee> {
+  private async findUser(userId: string): Promise<Employee> {
     // Implemente a lógica para encontrar o usuário no seu serviço de usuário ou banco de dados
     // Este é um exemplo básico, você pode ajustar conforme necessário
-    const employee = await this.employeeService.findOne(employeeId);
+    const user = await this.userService.findOne(userId);
 
-    if (!employee) {
+    if (!user) {
       throw new NotFoundException('Employee not found.');
     }
 
-    return employee;
+    return user;
   }
 
   @Get()
