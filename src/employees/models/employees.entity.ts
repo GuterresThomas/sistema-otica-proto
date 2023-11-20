@@ -18,6 +18,5 @@ export class Employee {
     @JoinColumn({ name: 'userId' })
     user: User; 
 
-    @OneToMany(type => Cash, cash => cash.employee, { cascade: true })
-    cash: Cash;
+    
 }
