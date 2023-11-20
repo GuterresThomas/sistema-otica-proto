@@ -53,10 +53,10 @@ export class CashController {
         }
 
   @HttpCode(201)  
-  @Post('open/:employeeId')
-  async openCash(@Param('employeeId') employeeId: string, @Res() res: Response): Promise<void> {
-    const employee = await this.userService.findOne(employeeId);
-    await this.cashService.openCash(employee);
+  @Post('open/:userId')
+  async openCash(@Param('userId') userId: string, @Res() res: Response): Promise<void> {
+    const user = await this.userService.findOne(userId);
+    await this.cashService.openCash(user);
 
     const openedCash = new Date().toLocaleString();
 
@@ -75,22 +75,22 @@ export class CashController {
     res.json()
   }
 
-  private async findUser(userId: string): Promise<Employee> {
+  private async findUser(userId: string): Promise<User> {
     // Implemente a lógica para encontrar o usuário no seu serviço de usuário ou banco de dados
     // Este é um exemplo básico, você pode ajustar conforme necessário
     const user = await this.userService.findOne(userId);
 
     if (!user) {
-      throw new NotFoundException('Employee not found.');
+      throw new NotFoundException('User not found.');
     }
 
     return user;
   }
 
   @Get()
-  async getBalance(employee: Employee): Promise<number> {
+  async getBalance(user: User): Promise<number> {
       
-    return this.cashService.getBalance(employee);
+    return this.cashService.getBalance(user);
   }
   
 }
