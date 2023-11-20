@@ -13,6 +13,11 @@ export class Employee {
     @Column()
     name: string;
 
+    @Column()
+    email: string;
+
+    @Column()
+    phone: string;
 
     @ManyToOne(() => User, (user) => user.employees)
     @JoinColumn({ name: 'userId' })
