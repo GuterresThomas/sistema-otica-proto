@@ -1,14 +1,16 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, ManyToOne } from 'typeorm';
 import { Employee } from 'src/employees/models/employees.entity';
+import { User } from 'src/users/models/user.entity';
+
 // Exemplo de entidade
 @Entity()
 export class ClosedCashHistory {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Employee, { eager: true })
-  @JoinColumn({ name: 'employee_id' })
-  employee: Employee;
+  @ManyToOne(() => User, { eager: true })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 
   @Column()
   balance_in_cents: number;

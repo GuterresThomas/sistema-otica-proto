@@ -187,17 +187,17 @@ export class CashService {
      private readonly closedCashHistoryService: ClosedCashHistoryService,
   ) {}
 
-  async getBalance(employee: Employee): Promise<number> {
-    const cash = await this.getCashByEmployee(employee);
+  async getBalance(user: User): Promise<number> {
+    const cash = await this.getCashByUser(user);
     return cash ? cash.balance_in_cents : 0;
   }
 
-  async updateBalance(employee: Employee, amount: number): Promise<void> {
-    let cash = await this.getCashByEmployee(employee);
+  async updateBalance(user: User, amount: number): Promise<void> {
+    let cash = await this.getCashByUser(user);
 
     if (!cash) {
       cash = new Cash();
-      cash.employee = employee;
+      cash.user = user;
     }
 
     cash.balance_in_cents += amount;
@@ -205,8 +205,8 @@ export class CashService {
     await this.cashRepository.save(cash);
   }
 
-  async openCash(employee: Employee): Promise<void> {
-    const existingCash = await this.getCashByEmployee(employee);
+  async openCash(user: User): Promise<void> {
+    const existingCash = await this.getCashByUser(user);
   
     // Se um caixa existente estiver fechado, reabre o caixa atual
     if (existingCash && existingCash.isClosed) {
@@ -216,24 +216,24 @@ export class CashService {
     } else {
       // Se não houver um caixa existente, cria um novo caixa aberto
       const newCash = new Cash();
-      newCash.employee = employee;
+      newCash.user = user;
       newCash.isClosed = false;
       newCash.openedAt = new Date();
       await this.cashRepository.save(newCash);
     }
   }
 
-  async isCashOpen(employee: Employee): Promise<boolean> {
+  async isCashOpen(user: User): Promise<boolean> {
     // Obtenha o caixa para o funcionário
-    const cash = await this.getCashByEmployee(employee);
+    const cash = await this.getCashByUser(user);
   
     // Verifica se o caixa está aberto
     return !!cash && !cash.isClosed;
   }
   
 
-  async closeCash(employee: Employee): Promise<void> {
-    const cash = await this.getCashByEmployee(employee);
+  async closeCash(user: User): Promise<void> {
+    const cash = await this.getCashByUser(user);
   
     if (!cash) {
       throw new NotFoundException('Cash not found for this user.');
@@ -246,14 +246,14 @@ export class CashService {
     await this.cashRepository.save(cash);
   
     const closedCashHistory = new ClosedCashHistory();
-    closedCashHistory.employee = employee;
+    closedCashHistory.user = user;
     closedCashHistory.balance_in_cents = cash.balance_in_cents;
     closedCashHistory.closed_at = cash.closedAt; // ou use new Date() se preferir uma nova data
     await this.closedCashHistoryService.createClosedCashHistory(closedCashHistory);
   }
   
 
- /* async createNewCash(employee: Employee): Promise<Cash> {
+ /* async createNewCash(user: User): Promise<Cash> {
     const newCash = new Cash();
     newCash.employee = employee;
     newCash.isClosed = false;
@@ -263,8 +263,8 @@ export class CashService {
   
 
 
-  async getCashByEmployee(employee: Employee): Promise<Cash | undefined> {
-    return this.cashRepository.findOne({ where: { employee } });
+  async getCashByUser(user: User): Promise<Cash | undefined> {
+    return this.cashRepository.findOne({ where: { user } });
   }
 
 }
@@ -323,22 +323,22 @@ export class SalesService {
   const totalAmount = createSaleDto.total_amount_in_cents;
 
   // Atualizar o saldo do caixa
- const employee = { id: createSaleDto.employee_id } as Employee;
+ const user = { id: createSaleDto.user_id } as User;
   
- const isCashOpen = await cashService.isCashOpen(employee);
+ const isCashOpen = await cashService.isCashOpen(user);
  if (!isCashOpen) {
-   throw new Error('Cash is closed for this employee. Open the cash before making a sale.');
+   throw new Error('Cash is closed for this user. Open the cash before making a sale.');
  }
 
  
   // Adicionar o valor total da venda do saldo do caixa
-  await cashService.updateBalance(employee, totalAmount);
+  await cashService.updateBalance(user, totalAmount);
 
 
     console.log(sale);
     sale.client = { id: createSaleDto.client_id } as Client;
     sale.product = { id: createSaleDto.product_id } as Product;
-    sale.employee = { id: createSaleDto.employee_id } as Employee;
+    sale.user = { id: createSaleDto.user_id } as User;
     sale.cash = {id: createSaleDto.cash_id } as Cash;
     return this.saleRepository.save(sale);
   }

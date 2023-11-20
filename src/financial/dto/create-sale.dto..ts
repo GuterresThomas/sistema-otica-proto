@@ -8,7 +8,7 @@ export class CreateSaleDto {
   product_id: string;
 
   @IsUUID()
-  employee_id: string;
+  user_id: string;
 
   @IsNumber()
   quantity_sold: number;

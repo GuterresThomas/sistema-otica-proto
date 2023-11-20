@@ -4,6 +4,7 @@ import { Client } from '../../clients/models/client.entity';  // Importe outras 
 import { Product } from '../../products/models/product.entity';
 import { Employee } from '../../employees/models/employees.entity';
 import { Cash } from './cash.entity';
+import { User } from 'src/users/models/user.entity';
 
 @Entity()
 export class Sale {
@@ -18,9 +19,9 @@ export class Sale {
   @JoinColumn({ name: 'product_id' })
   product: Product;
 
-  @ManyToOne(() => Employee)
-  @JoinColumn({ name: 'employee_id' })
-  employee: Employee;
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 
   @ManyToOne(() => Cash)
   @JoinColumn({ name: 'cash_id' })
