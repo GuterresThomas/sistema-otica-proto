@@ -52,28 +52,39 @@ export class CashController {
           res.status(HttpStatus.OK).json({ balance });
         }
 
-  @HttpCode(201)  
-  @Post('open/:userId')
-  async openCash(@Param('userId') userId: string, @Res() res: Response): Promise<void> {
-    const user = await this.userService.findOne(userId);
-    await this.cashService.openCash(user);
-
-    const openedCash = new Date().toLocaleString();
-
-    console.log(`cash opened at: ${openedCash}`)
-  }
-
-  @HttpCode(201)
-  @Post('close/:userId')
-  async closeCash(@Param('userId') userId: string, @Res() res: Response): Promise<void> {
-    const user = await this.findUser(userId);
-    await this.cashService.closeCash(user);
-
-    const closedAt = new Date().toLocaleString();
-
-    console.log(`cash closed at: ${closedAt}`)
-    res.json()
-  }
+        @HttpCode(201)  
+        @Post('open/:userId')
+        async openCash(@Param('userId') userId: string, @Res() res: Response): Promise<void> {
+          try {
+            const user = await this.userService.findOne(userId);
+            await this.cashService.openCash(user);
+        
+            const openedCash = new Date().toLocaleString();
+            console.log(`cash opened at: ${openedCash}`);
+        
+            res.status(201).json({ message: 'Caixa aberto com sucesso' });
+          } catch (error) {
+            console.error('Erro ao abrir o caixa:', error);
+            res.status(500).json({ error: 'Erro ao abrir o caixa' });
+          }
+        }
+        
+        @HttpCode(201)
+        @Post('close/:userId')
+        async closeCash(@Param('userId') userId: string, @Res() res: Response): Promise<void> {
+          try {
+            const user = await this.findUser(userId);
+            await this.cashService.closeCash(user);
+        
+            const closedAt = new Date().toLocaleString();
+            console.log(`cash closed at: ${closedAt}`);
+        
+            res.status(201).json({ message: 'Caixa fechado com sucesso' });
+          } catch (error) {
+            console.error('Erro ao fechar o caixa:', error);
+            res.status(500).json({ error: 'Erro ao fechar o caixa' });
+          }
+        }
 
   private async findUser(userId: string): Promise<User> {
     // Implemente a lógica para encontrar o usuário no seu serviço de usuário ou banco de dados
