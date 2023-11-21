@@ -191,6 +191,17 @@ export class CashService {
      private readonly closedCashHistoryService: ClosedCashHistoryService,
   ) {}
 
+  async checkCashStatus(user: User): Promise<boolean> {
+    try {
+      const cash = await this.getCashByUser(user);
+      return !!cash && !cash.isClosed; // Retorna true se o caixa estiver aberto, false caso contrário
+    } catch (error) {
+      console.error('Erro ao verificar status do caixa:', error);
+      throw new Error('Erro ao verificar status do caixa');
+    }
+  }
+
+
   async getBalance(user: User): Promise<number> {
     const cash = await this.getCashByUser(user);
     return cash ? cash.balance_in_cents : 0;

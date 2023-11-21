@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, NotFoundException, HttpCode, Res, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, NotFoundException, HttpCode, Res, HttpStatus, InternalServerErrorException } from '@nestjs/common';
 import { CashService, FinancialService, SalesService } from './financial.service';
 import { User } from 'src/users/models/user.entity';
 import { UsersService } from 'src/users/users.service';
@@ -108,11 +108,26 @@ export class CashController {
 
 @Controller('api/v1/sales')
 export class SalesController{
-  constructor(private readonly salesService: SalesService) {}
+  constructor(
+    private readonly salesService: SalesService,
+    private readonly userService: UsersService,
+    private readonly cashService: CashService,
+    ) {}
 
   @Get()
   async getAllSales(): Promise<Sale[]> {
     return this.salesService.getAllSales();
+  }
+
+  @Get('status/:userId')
+  async checkCashStatus(@Param('userId') userId: string): Promise<boolean> {
+    try {
+      const user = await this.userService.findOne(userId);
+      return await this.cashService.checkCashStatus(user);
+    } catch (error) {
+      console.error('Erro ao verificar status do caixa:', error);
+      throw new InternalServerErrorException('Erro ao verificar status do caixa');
+    }
   }
 
   @Get(':id')
