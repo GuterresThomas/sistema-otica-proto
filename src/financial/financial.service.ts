@@ -177,6 +177,10 @@ export class ClosedCashHistoryService {
   }
 }
 
+interface CashOperationResult {
+  success: boolean;
+  message?: string;
+}
 
 @Injectable()
 export class CashService {
@@ -205,23 +209,31 @@ export class CashService {
     await this.cashRepository.save(cash);
   }
 
-  async openCash(user: User): Promise<void> {
-    const existingCash = await this.getCashByUser(user);
-  
-    // Se um caixa existente estiver fechado, reabre o caixa atual
-    if (existingCash && existingCash.isClosed) {
-      existingCash.isClosed = false;
-      existingCash.openedAt = new Date();
-      await this.cashRepository.save(existingCash);
-    } else {
-      // Se não houver um caixa existente, cria um novo caixa aberto
-      const newCash = new Cash();
-      newCash.user = user;
-      newCash.isClosed = false;
-      newCash.openedAt = new Date();
-      await this.cashRepository.save(newCash);
+ 
+  async openCash(user: User): Promise<CashOperationResult> {
+    try {
+      const existingCash = await this.getCashByUser(user);
+    
+      // Se um caixa existente estiver fechado, reabre o caixa atual
+      if (existingCash && existingCash.isClosed) {
+        existingCash.isClosed = false;
+        existingCash.openedAt = new Date();
+        await this.cashRepository.save(existingCash);
+      } else {
+        // Se não houver um caixa existente, cria um novo caixa aberto
+        const newCash = new Cash();
+        newCash.user = user;
+        newCash.isClosed = false;
+        newCash.openedAt = new Date();
+        await this.cashRepository.save(newCash);
     }
+    return { success: true, message: 'Caixa aberto/reaberto com sucesso' };
   }
+  catch (error) {
+    console.error('Erro ao abrir/reabrir o caixa:', error);
+    return { success: false, message: 'Erro ao abrir/reabrir o caixa' };
+  }
+}
 
   async isCashOpen(user: User): Promise<boolean> {
     // Obtenha o caixa para o funcionário
@@ -232,9 +244,10 @@ export class CashService {
   }
   
 
-  async closeCash(user: User): Promise<void> {
+  async closeCash(user: User): Promise<CashOperationResult> {
+    
+    try {
     const cash = await this.getCashByUser(user);
-  
     if (!cash) {
       throw new NotFoundException('Cash not found for this user.');
     }
@@ -250,7 +263,14 @@ export class CashService {
     closedCashHistory.balance_in_cents = cash.balance_in_cents;
     closedCashHistory.closed_at = cash.closedAt; // ou use new Date() se preferir uma nova data
     await this.closedCashHistoryService.createClosedCashHistory(closedCashHistory);
+
+    return { success: true, message: 'Caixa fechado com sucesso' };
   }
+  catch (error) {
+    console.error('Erro ao fechar o caixa:', error);
+    return { success: false, message: 'Erro ao fechar o caixa' };
+  }
+}
   
 
  /* async createNewCash(user: User): Promise<Cash> {
