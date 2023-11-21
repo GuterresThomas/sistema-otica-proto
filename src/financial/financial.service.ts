@@ -233,7 +233,7 @@ export class CashService {
 }
 
 
-async openCash(user: User): Promise<CashOperationResult> {
+async openCash(user: User, initialBalance: number): Promise<CashOperationResult> {
   try {
       console.log('User trying to open cash:', user);
 
@@ -246,6 +246,7 @@ async openCash(user: User): Promise<CashOperationResult> {
           console.log('Existing cash is closed. Reopening...');
           existingCash.isClosed = false;
           existingCash.openedAt = new Date();
+          existingCash.balance_in_cents = initialBalance;
           await this.cashRepository.save(existingCash);
 
           console.log('Cash reopened successfully');
@@ -256,6 +257,7 @@ async openCash(user: User): Promise<CashOperationResult> {
           newCash.user = user;
           newCash.isClosed = false;
           newCash.openedAt = new Date();
+          newCash.balance_in_cents = initialBalance;
           await this.cashRepository.save(newCash);
 
           console.log('New cash created and opened successfully');

@@ -53,14 +53,14 @@ export class CashController {
         }
 
         @HttpCode(201)  
-        @Post('open/:userId')
-        async openCash(@Param('userId') userId: string, @Res() res: Response): Promise<void> {
+        @Post('open/:userId/:initialBalance')
+        async openCash(@Param('userId') userId: string, @Param('initialBalance') initialBalance: number, @Res() res: Response): Promise<void> {
           try {
             
             
             const user = await this.userService.findOne(userId);
             
-            await this.cashService.openCash(user);
+            await this.cashService.openCash(user, initialBalance);
         
             const openedCash = new Date().toLocaleString();
             console.log(`cash opened at: ${openedCash}`);
