@@ -38,16 +38,16 @@ export class UsersController {
     }
 
     @Post('login')
-    async login(@Body() body: { email: string, password: string }): Promise<{ token: string, name: string }> {
+    async login(@Body() body: { email: string, password: string }): Promise<{ token: string, name: string, id: string}> {
         const { email, password } = body;
 
-        const {token, name} = await this.usersService.login(email, password);
+        const {token, name, id} = await this.usersService.login(email, password);
 
         if (!token) {
             throw new NotFoundException('Credenciais inválidas');
         }
 
-        return { token, name };
+        return { token, name, id };
     }
 
     
