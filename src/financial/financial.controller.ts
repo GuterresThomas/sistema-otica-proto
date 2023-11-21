@@ -56,7 +56,10 @@ export class CashController {
         @Post('open/:userId')
         async openCash(@Param('userId') userId: string, @Res() res: Response): Promise<void> {
           try {
+            
+            
             const user = await this.userService.findOne(userId);
+            
             await this.cashService.openCash(user);
         
             const openedCash = new Date().toLocaleString();

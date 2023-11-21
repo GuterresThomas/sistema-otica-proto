@@ -208,41 +208,63 @@ export class CashService {
   }
 
   async updateBalance(user: User, amount: number): Promise<void> {
-    let cash = await this.getCashByUser(user);
-
-    if (!cash) {
-      cash = new Cash();
-      cash.user = user;
-    }
-
-    cash.balance_in_cents += amount;
-
-    await this.cashRepository.save(cash);
-  }
-
- 
-  async openCash(user: User): Promise<CashOperationResult> {
     try {
+        console.log('Received user data in updateBalance:', user);
+        console.log('Received amount:', amount);
+
+        let cash = await this.getCashByUser(user);
+
+        if (!cash) {
+            cash = new Cash();
+            cash.user = user;
+        }
+
+        console.log('Current balance before update:', cash.balance_in_cents);
+
+        cash.balance_in_cents += amount;
+
+        console.log('Updated balance:', cash.balance_in_cents);
+
+        await this.cashRepository.save(cash);
+    } catch (error) {
+        console.error('Error while updating cash balance:', error);
+        throw new Error('Error while updating cash balance');
+    }
+}
+
+
+async openCash(user: User): Promise<CashOperationResult> {
+  try {
+      console.log('User trying to open cash:', user);
+
       const existingCash = await this.getCashByUser(user);
-    
+
+      console.log('Existing cash:', existingCash);
+
       // Se um caixa existente estiver fechado, reabre o caixa atual
       if (existingCash && existingCash.isClosed) {
-        existingCash.isClosed = false;
-        existingCash.openedAt = new Date();
-        await this.cashRepository.save(existingCash);
+          console.log('Existing cash is closed. Reopening...');
+          existingCash.isClosed = false;
+          existingCash.openedAt = new Date();
+          await this.cashRepository.save(existingCash);
+
+          console.log('Cash reopened successfully');
       } else {
-        // Se não houver um caixa existente, cria um novo caixa aberto
-        const newCash = new Cash();
-        newCash.user = user;
-        newCash.isClosed = false;
-        newCash.openedAt = new Date();
-        await this.cashRepository.save(newCash);
-    }
-    return { success: true, message: 'Caixa aberto/reaberto com sucesso' };
-  }
-  catch (error) {
-    console.error('Erro ao abrir/reabrir o caixa:', error);
-    return { success: false, message: 'Erro ao abrir/reabrir o caixa' };
+          // Se não houver um caixa existente, cria um novo caixa aberto
+          console.log('No existing cash. Creating new cash...');
+          const newCash = new Cash();
+          newCash.user = user;
+          newCash.isClosed = false;
+          newCash.openedAt = new Date();
+          await this.cashRepository.save(newCash);
+
+          console.log('New cash created and opened successfully');
+      }
+
+      return { success: true, message: 'Caixa aberto/reaberto com sucesso' };
+  } catch (error) {
+      console.error('Erro ao abrir/reabrir o caixa:', error);
+      return { success: false, message: 'Erro ao abrir/reabrir o caixa' };
   }
 }
 
@@ -256,31 +278,35 @@ export class CashService {
   
 
   async closeCash(user: User): Promise<CashOperationResult> {
-    
     try {
-    const cash = await this.getCashByUser(user);
-    if (!cash) {
-      throw new NotFoundException('Cash not found for this user.');
-    }
-  
-    cash.isClosed = true;
-    cash.closedAt = new Date();
-  
-    // Salve a entidade existente para fechar o caixa atual
-    await this.cashRepository.save(cash);
-  
-    const closedCashHistory = new ClosedCashHistory();
-    closedCashHistory.user = user;
-    closedCashHistory.balance_in_cents = cash.balance_in_cents;
-    closedCashHistory.closed_at = cash.closedAt; // ou use new Date() se preferir uma nova data
-    await this.closedCashHistoryService.createClosedCashHistory(closedCashHistory);
+        console.log('Received user data in closeCash:', user);
 
-    return { success: true, message: 'Caixa fechado com sucesso' };
-  }
-  catch (error) {
-    console.error('Erro ao fechar o caixa:', error);
-    return { success: false, message: 'Erro ao fechar o caixa' };
-  }
+        const cash = await this.getCashByUser(user);
+        if (!cash) {
+            throw new NotFoundException('Cash not found for this user.');
+        }
+
+        console.log('Current balance before closing cash:', cash.balance_in_cents);
+
+        cash.isClosed = true;
+        cash.closedAt = new Date();
+
+        await this.cashRepository.save(cash);
+
+        console.log('Closed cash balance:', cash.balance_in_cents);
+
+        const closedCashHistory = new ClosedCashHistory();
+        closedCashHistory.user = user;
+        closedCashHistory.balance_in_cents = cash.balance_in_cents;
+        closedCashHistory.closed_at = cash.closedAt;
+
+        await this.closedCashHistoryService.createClosedCashHistory(closedCashHistory);
+
+        return { success: true, message: 'Cash closed successfully' };
+    } catch (error) {
+        console.error('Error while closing cash:', error);
+        return { success: false, message: 'Error while closing cash' };
+    }
 }
   
 
