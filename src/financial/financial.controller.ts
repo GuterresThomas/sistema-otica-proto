@@ -64,25 +64,31 @@ export class CashController {
           res.status(HttpStatus.OK).json({ balance });
         }
 
-        @HttpCode(201)  
-        @Post('open/:userId/:initialBalance')
-        async openCash(@Param('userId') userId: string, @Param('initialBalance') initialBalance: number, @Res() res: Response): Promise<void> {
-          try {
-            
-            
-            const user = await this.userService.findOne(userId);
-            
-            await this.cashService.openCash(user, initialBalance);
-        
-            const openedCash = new Date().toLocaleString();
-            console.log(`cash opened at: ${openedCash}`);
-        
-            res.status(201).json({ message: 'Caixa aberto com sucesso' });
-          } catch (error) {
-            console.error('Erro ao abrir o caixa:', error);
-            res.status(500).json({ error: 'Erro ao abrir o caixa' });
-          }
-        }
+        @HttpCode(201)
+@Post('open/:userId/:initialBalance')
+async openCash(@Param('userId') userId: string, @Param('initialBalance') initialBalance: number, @Res() res: Response): Promise<void> {
+  try {
+    const user = await this.userService.findOne(userId);
+
+    const result = await this.cashService.openCash(user, initialBalance);
+
+    if (result.success && result.cashId) {
+      const openedCash = new Date().toLocaleString();
+      console.log(`Cash opened at: ${openedCash}`);
+
+      res.status(201).json({
+        success: true,
+        message: 'Caixa aberto com sucesso',
+        cashId: result.cashId,
+      });
+    } else {
+      throw new Error('Erro ao abrir o caixa');
+    }
+  } catch (error) {
+    console.error('Erro ao abrir o caixa:', error);
+    res.status(500).json({ error: 'Erro ao abrir o caixa' });
+  }
+}
         
         @HttpCode(201)
         @Post('close/:userId')
