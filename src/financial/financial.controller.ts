@@ -42,6 +42,18 @@ export class CashController {
         ) {}
     
 
+        @Get('status/:userId')
+        async checkCashStatus(@Param('userId') userId: string, @Res() res: Response): Promise<void> {
+            try {
+                const user = await this.findUser(userId);
+                const isCashOpen = await this.cashService.isCashOpen(user);
+    
+                res.status(HttpStatus.OK).json({ isCashOpen });
+            } catch (error) {
+                console.error('Erro ao verificar status do caixa:', error);
+                res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: 'Erro ao verificar status do caixa' });
+            }
+        }
 
         @Get('balance/:userId')
         async getBalanceById(@Param('userId') userId: string, @Res() res: Response): Promise<void> {
