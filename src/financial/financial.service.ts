@@ -233,7 +233,7 @@ export class CashService {
 }
 
 
-async openCash(user: User, initialBalance: number): Promise<CashOperationResult> {
+async openCash(user: User, initialBalance: number): Promise<CashOperationResult & { cashId?: string }> {
   try {
       console.log('User trying to open cash:', user);
 
@@ -248,7 +248,7 @@ async openCash(user: User, initialBalance: number): Promise<CashOperationResult>
           existingCash.openedAt = new Date();
           existingCash.balance_in_cents = initialBalance;
           await this.cashRepository.save(existingCash);
-
+          
           console.log('Cash reopened successfully');
       } else {
           // Se não houver um caixa existente, cria um novo caixa aberto
@@ -261,12 +261,13 @@ async openCash(user: User, initialBalance: number): Promise<CashOperationResult>
           await this.cashRepository.save(newCash);
 
           console.log('New cash created and opened successfully');
+          return { success: true, message: 'Novo caixa criado e aberto com sucesso', cashId: newCash.id };
       }
 
-      return { success: true, message: 'Caixa aberto/reaberto com sucesso' };
+      return { success: true, message: 'Caixa aberto/reaberto com sucesso', cashId: existingCash.id  };
   } catch (error) {
       console.error('Erro ao abrir/reabrir o caixa:', error);
-      return { success: false, message: 'Erro ao abrir/reabrir o caixa' };
+      return { success: false, message: 'Erro ao abrir/reabrir o caixa', };
   }
 }
 
