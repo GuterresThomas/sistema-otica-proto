@@ -343,9 +343,18 @@ export class SalesService {
   ) {}
 
   async getAllSales(): Promise<Sale[]> {
-    return this.saleRepository.find();
+    const salesWithRelatedEntities = await this.saleRepository.createQueryBuilder('sale')
+      .leftJoinAndSelect('sale.client', 'client')
+      .leftJoinAndSelect('sale.product', 'product')
+      .leftJoinAndSelect('sale.user', 'user')
+      .leftJoinAndSelect('sale.cash', 'cash')
+      .getMany();
+  
+    return salesWithRelatedEntities;
   }
 
+
+  
   async getSaleById(id: string): Promise<Sale> {
     const sale = await this.saleRepository.findOne({ where: { id } });
 
