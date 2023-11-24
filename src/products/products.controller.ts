@@ -20,9 +20,12 @@ export class ProductsController {
     }
 
     @Get(':id')
-    async findById(@Param('id') id: string, @Body() Product: Product): Promise<any> {
-        await this.productsService.findOne(id);
-        return { message: 'Product found'}
+    async findById(@Param('id') id: string): Promise<Product | { message: string }> {
+        const product = await this.productsService.findOne(id);
+        if (!product) {
+            throw new NotFoundException('Product not found!');
+        }
+        return product;
     }
 
     @Put(':id')
