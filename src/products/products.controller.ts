@@ -19,6 +19,12 @@ export class ProductsController {
         return createdProduct;
     }
 
+    @Get(':id')
+    async findById(@Param('id') id: string, @Body() Product: Product): Promise<any> {
+        await this.productsService.findOne(id);
+        return { message: 'Product found'}
+    }
+
     @Put(':id')
     async update(@Param('id') id: string, @Body() product: Product): Promise<any> {
         await this.productsService.update(id, product);
