@@ -343,31 +343,18 @@ export class SalesService {
   ) {}
 
   async getAllSales(): Promise<Sale[]> {
-    try {
-      const salesWithRelatedEntities = await this.saleRepository.createQueryBuilder('sale')
-        .leftJoinAndSelect('sale.client', 'client')
-        .leftJoinAndSelect('sale.product', 'product')
-        .leftJoinAndSelect('sale.user', 'user')
-        .leftJoinAndSelect('sale.cash', 'cash')
-        .select([
-          'sale.id',
-          'sale.date',
-          'client.id',
-          'client.name',
-          'product.id',
-          'product.name',
-          'user.id',
-          'user.username',
-          'cash.id',
-        ])
-        .getMany();
-  
-      return salesWithRelatedEntities;
-    } catch (error) {
-      // Handle errors appropriately based on your application's needs
-      throw new Error(`Error fetching sales with related entities: ${error.message}`);
-    }
+  try {
+    const salesWithRelatedEntities = await this.saleRepository.createQueryBuilder('sale')
+      .leftJoinAndSelect('sale.client', 'client')
+      .leftJoinAndSelect('sale.product', 'product')
+      .getMany();
+
+    return salesWithRelatedEntities;
+  } catch (error) {
+    // Handle errors appropriately based on your application's needs
+    throw new Error(`Error fetching sales with related entities: ${error.message}`);
   }
+}
 
 
   
