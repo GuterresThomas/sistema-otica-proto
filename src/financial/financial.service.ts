@@ -345,10 +345,21 @@ export class SalesService {
   async getAllSales(): Promise<Sale[]> {
     try {
       const salesWithRelatedEntities = await this.saleRepository.createQueryBuilder('sale')
-        .leftJoinAndSelect('sale.client', 'client.name')
-        .leftJoinAndSelect('sale.product', 'product.name')
-        .leftJoinAndSelect('sale.user', 'user.name')
-        .leftJoinAndSelect('sale.cash', 'cash.userId')
+        .leftJoinAndSelect('sale.client', 'client')
+        .leftJoinAndSelect('sale.product', 'product')
+        .leftJoinAndSelect('sale.user', 'user')
+        .leftJoinAndSelect('sale.cash', 'cash')
+        .select([
+          'sale.id',
+          'sale.date',
+          'client.id',
+          'client.name',
+          'product.id',
+          'product.name',
+          'user.id',
+          'user.username',
+          'cash.id',
+        ])
         .getMany();
   
       return salesWithRelatedEntities;
