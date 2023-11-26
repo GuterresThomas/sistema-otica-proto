@@ -430,4 +430,19 @@ export class SalesService {
 
     await this.saleRepository.remove(sale);
   }
+
+  async getSalesByDateRange(startDate: Date, endDate: Date): Promise<Sale[]> {
+    try {
+      const salesWithRelatedEntities = await this.saleRepository.createQueryBuilder('sale')
+        .leftJoinAndSelect('sale.client', 'client')
+        .leftJoinAndSelect('sale.product', 'product')
+        .where('sale.sale_date BETWEEN :startDate AND :endDate', { startDate, endDate })
+        .getMany();
+
+      return salesWithRelatedEntities;
+    } catch (error) {
+      // Handle errors appropriately based on your application's needs
+      throw new Error(`Error fetching sales within date range: ${error.message}`);
+    }
+  }
 }

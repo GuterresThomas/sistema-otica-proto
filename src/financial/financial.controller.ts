@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, NotFoundException, HttpCode, Res, HttpStatus, InternalServerErrorException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, NotFoundException, HttpCode, Res, HttpStatus, InternalServerErrorException, Query, BadRequestException } from '@nestjs/common';
 import { CashService, FinancialService, SalesService } from './financial.service';
 import { User } from 'src/users/models/user.entity';
 import { UsersService } from 'src/users/users.service';
@@ -140,6 +140,21 @@ export class SalesController{
     return this.salesService.getAllSales();
   }
 
+  @Get('date-range')
+  async getSalesByDateRange(
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+  ): Promise<Sale[]> {
+    const salesStartDate = new Date(startDate);
+    const salesEndDate = new Date(endDate);
+    
+    if (isNaN(salesStartDate.getTime()) || isNaN(salesEndDate.getTime())) {
+      throw new BadRequestException('Invalid date format. Please provide dates in valid format.');
+    }
+
+    return this.salesService.getSalesByDateRange(salesStartDate, salesEndDate);
+  }
+  
   @Get('status/:userId')
   async checkCashStatus(@Param('userId') userId: string): Promise<boolean> {
     try {
