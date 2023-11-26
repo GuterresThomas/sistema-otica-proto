@@ -147,7 +147,8 @@ export class SalesController{
   ): Promise<Sale[]> {
     const salesStartDate = new Date(startDate);
     const salesEndDate = new Date(endDate);
-    
+    console.log(startDate,'data de inicio')
+    console.log(endDate,'data de fim')
     if (isNaN(salesStartDate.getTime()) || isNaN(salesEndDate.getTime())) {
       throw new BadRequestException('Invalid date format. Please provide dates in valid format.');
     }
