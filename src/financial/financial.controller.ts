@@ -20,12 +20,12 @@ export class FinancialController {
     private readonly financialService: FinancialService
     ) {}
 
-  @Get()
+  @Get('/payable-accounts')
   async getAllPayableAccounts(): Promise<PayableAccount[]> {
     return this.financialService.getAllPayableAccounts()
   }
 
-  @Get()
+  @Get('/receivable-accounts')
   async getAllReceivableAccounts(): Promise<ReceivableAccount[]> {
     return this.financialService.getAllReceivableAccounts()
   }
