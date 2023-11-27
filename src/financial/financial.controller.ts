@@ -5,11 +5,13 @@ import { UsersService } from 'src/users/users.service';
 import { Employee } from 'src/employees/models/employees.entity';
 import { Cash } from './models/cash.entity';
 import { Sale } from './models/sale.entity';
+import { PayableAccount } from './models/payable_account.entity';
 import { CreateSaleDto } from './dto/create-sale.dto.';
 import { UpdateSaleDto } from './dto/update-sale.dto';
 import { CreatePayableAccountDto } from './dto/create-payable-account.dto';
 import { CreateReceivableAccountDto } from './dto/create-receivable-account.dto';
 import { Response } from 'express'; 
+import { ReceivableAccount } from './models/receivable_account.entity';
 
 
 @Controller('api/v1/financial')
@@ -17,6 +19,16 @@ export class FinancialController {
   constructor(
     private readonly financialService: FinancialService
     ) {}
+
+  @Get()
+  async getAllPayableAccounts(): Promise<PayableAccount[]> {
+    return this.financialService.getAllPayableAccounts()
+  }
+
+  @Get()
+  async getAllReceivableAccounts(): Promise<ReceivableAccount[]> {
+    return this.financialService.getAllReceivableAccounts()
+  }
 
   @HttpCode(HttpStatus.CREATED)
   @Post('payable-accounts')

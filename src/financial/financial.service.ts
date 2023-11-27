@@ -41,6 +41,27 @@ closedCashHistoryService: ClosedCashHistoryService;
     
   ) {}
 
+
+  async getAllPayableAccounts(): Promise<PayableAccount[]> {
+    try {
+      const allPayableAccounts = await this.payableAccountRepository.find();
+      return allPayableAccounts;
+    } catch (error) {
+      // Trate qualquer erro que possa ocorrer durante a busca das contas a pagar
+      throw new Error('Erro ao buscar contas a receber');
+    }
+  }
+  async getAllReceivableAccounts(): Promise<ReceivableAccount[]> {
+    try {
+      const allReceivableAccounts = await this.receivableAccountRepository.find();
+      return allReceivableAccounts;
+    } catch (error) {
+      // Trate qualquer erro que possa ocorrer durante a busca das contas a pagar
+      throw new Error('Erro ao buscar contas a receber');
+    }
+  }
+
+  
   
   async createPayableAccount(createPayableAccountDto: CreatePayableAccountDto): Promise<PayableAccount> {
       console.log('Valores e tipos antes da validação do DTO:');
