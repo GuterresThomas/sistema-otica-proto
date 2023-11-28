@@ -160,9 +160,13 @@ closedCashHistoryService: ClosedCashHistoryService;
 
     if (cash) {
       const accountAmount = account.amount_in_cents;
-  
+      
+
+
       // Adiciona o valor da conta a receber ao saldo do caixa
       cash.balance_in_cents += accountAmount;
+      console.log('cash.balance_in_cents:', typeof cash.balance_in_cents);
+      
       
       console.log(account, 'contita')
       await this.cashRepository.save(cash);
