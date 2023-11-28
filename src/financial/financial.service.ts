@@ -93,32 +93,29 @@ closedCashHistoryService: ClosedCashHistoryService;
       due_date: parsedFormattedDueDate,
     });
 
-    await this.updateBalanceForPaidAccounts();
+    await this.updateBalanceForPaidAccounts(newPayableAccount);
 
     return await this.payableAccountRepository.save(newPayableAccount);
   }
   
-  async updateBalanceForPaidAccounts(): Promise<void> {
-    // Busca por contas a pagar que estão fechadas e pagas
-    const paidAccounts = await this.payableAccountRepository.find({
-      where: {
-        is_open: false,
-        paid: true,
-      },
-      relations: ['cash'], // Adiciona a relação com a entidade Cash
-    });
+  async updateBalanceForPaidAccounts(account: PayableAccount): Promise<void> {
+    const cash = account.cash;
 
-    for (const account of paidAccounts) {
-      // Obtém o caixa associado à conta a pagar
-      const cash = account.cash; // Supondo que a relação se chame 'cash'
-  
-      if (cash) {
-        cash.balance_in_cents -= account.amount_in_cents;
-        await this.cashRepository.save(cash);
-      }
+    if (cash) {
+      const accountAmount = account.amount_in_cents;
+      
 
+
+      // Subtrai o valor da conta a receber ao saldo do caixa
+      cash.balance_in_cents -= accountAmount;
+      console.log('cash.balance_in_cents:', typeof cash.balance_in_cents);
+      
+      
+      console.log(account, 'contita')
+      await this.cashRepository.save(cash);
     }
   }
+
   
   async createReceivableAccount(createReceivableAccountDto: CreateReceivableAccountDto): Promise<ReceivableAccount> {
     console.log('Valores e tipos antes da validação do DTO:');
