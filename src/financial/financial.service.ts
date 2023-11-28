@@ -168,7 +168,7 @@ closedCashHistoryService: ClosedCashHistoryService;
 
     for (const account of receivedAccounts) {
       console.log('Account:', account);
-      const cash = account.cash;
+      const cash = await this.cashRepository.findOne({ where: { id: account.cash.id } });
     
       if (cash) {
         console.log('Cash:', cash);
