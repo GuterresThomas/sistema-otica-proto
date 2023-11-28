@@ -151,31 +151,21 @@ closedCashHistoryService: ClosedCashHistoryService;
         });
 
 
-        await this.updateBalanceForReceivedAccounts();
+        await this.updateBalanceForReceivedAccounts(newReceivableAccount);
 
     return this.receivableAccountRepository.save(newReceivableAccount);
   }
-  async updateBalanceForReceivedAccounts(): Promise<void> {
-    const receivedAccounts = await this.receivableAccountRepository.find({
-      where: {
-        is_open: false,
-        received: true,
-      },
-      relations: ['cash'],
-    });
-    console.log( 'contas a receber:', receivedAccounts)
-  
-    for (const account of receivedAccounts) {
-      const cash = account.cash;
-  
-      if (cash) { // Salvar o saldo anterior do caixa
-        const accountAmount = account.amount_in_cents;
+  async updateBalanceForReceivedAccounts(account: ReceivableAccount): Promise<void> {
+    const cash = account.cash;
 
-        // Adiciona o valor da conta a receber ao saldo do caixa
-        cash.balance_in_cents = cash.balance_in_cents + accountAmount;
-        
-        await this.cashRepository.save(cash);
-      }
+    if (cash) {
+      const accountAmount = account.amount_in_cents;
+  
+      // Adiciona o valor da conta a receber ao saldo do caixa
+      cash.balance_in_cents += accountAmount;
+      
+      console.log(account, 'contita')
+      await this.cashRepository.save(cash);
     }
   }
 
