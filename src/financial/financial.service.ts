@@ -100,7 +100,7 @@ closedCashHistoryService: ClosedCashHistoryService;
   
   async updateBalanceForPaidAccounts(account: PayableAccount): Promise<void> {
     const cash = account.cash;
-
+    console.log(cash)
     if (cash) {
       const accountAmount = account.amount_in_cents;
       
