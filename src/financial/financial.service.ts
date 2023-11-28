@@ -171,7 +171,7 @@ closedCashHistoryService: ClosedCashHistoryService;
         const accountAmount = account.amount_in_cents;
 
         // Adiciona o valor da conta a receber ao saldo do caixa
-        cash.balance_in_cents += accountAmount;
+        cash.balance_in_cents = cash.balance_in_cents + accountAmount;
   
         await this.cashRepository.save(cash);
       }
