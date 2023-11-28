@@ -163,6 +163,7 @@ closedCashHistoryService: ClosedCashHistoryService;
       },
       relations: ['cash'],
     });
+    console.log( 'contas a receber:', receivedAccounts)
   
     for (const account of receivedAccounts) {
       const cash = account.cash;
@@ -172,7 +173,7 @@ closedCashHistoryService: ClosedCashHistoryService;
 
         // Adiciona o valor da conta a receber ao saldo do caixa
         cash.balance_in_cents = cash.balance_in_cents + accountAmount;
-  
+        
         await this.cashRepository.save(cash);
       }
     }
