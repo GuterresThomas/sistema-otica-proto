@@ -167,15 +167,13 @@ closedCashHistoryService: ClosedCashHistoryService;
     for (const account of receivedAccounts) {
       const cash = account.cash;
   
-      if (cash) {
-        const previousBalance = cash.balance_in_cents; // Salvar o saldo anterior do caixa
+      if (cash) { // Salvar o saldo anterior do caixa
         const accountAmount = account.amount_in_cents;
+
+        // Adiciona o valor da conta a receber ao saldo do caixa
+        cash.balance_in_cents += accountAmount;
   
-        // Se o valor da conta a receber já foi adicionado ao saldo, não adicione novamente
-        if (previousBalance !== cash.balance_in_cents) {
-          cash.balance_in_cents = previousBalance - accountAmount;
-          await this.cashRepository.save(cash);
-        }
+        await this.cashRepository.save(cash);
       }
     }
   }
