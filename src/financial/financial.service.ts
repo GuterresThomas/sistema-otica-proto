@@ -151,35 +151,26 @@ closedCashHistoryService: ClosedCashHistoryService;
         });
 
 
-        await this.updateBalanceForReceivedAccounts();
+    
+  await this.updateBalanceForReceivedAccounts(newReceivableAccount); // Chama a função de atualização com a conta recém-criada
+
 
     return this.receivableAccountRepository.save(newReceivableAccount);
   }
 
-  async updateBalanceForReceivedAccounts(): Promise<void> {
+  async updateBalanceForReceivedAccounts(account: ReceivableAccount): Promise<void> {
     // Busca por contas a pagar que estão fechadas e pagas
-    const receivedAccounts = await this.receivableAccountRepository.find({
-      where: {
-        is_open: false,
-        received: true,
-      },
-      relations: ['cash'], // Adiciona a relação com a entidade Cash
-    });
-
-    for (const account of receivedAccounts) {
-      console.log('Account:', account);
+    try {
       const cash = await this.cashRepository.findOne({ where: { id: account.cash.id } });
-    
+  
       if (cash) {
-        console.log('Cash:', cash);
         cash.balance_in_cents += account.amount_in_cents;
-        console.log('New Cash Balance:', cash.balance_in_cents);
-    
         await this.cashRepository.save(cash);
       }
+    } catch (error) {
+      throw new Error(`Erro ao atualizar o saldo do caixa: ${error.message}`);
     }
   }
-
 }
 
 
